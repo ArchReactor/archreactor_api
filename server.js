@@ -94,11 +94,13 @@ app.get("/users", (req, res) => {
   let payload = {api_key: settings.api_key, key: settings.key, entity: "Contact", action: "get", json: json }
   request({url: settings.url, qs: payload}, function (error, response, body) {
     if(response && response.statusCode == 200){
-      let contacts = parseContacts(body)
-      res.send(`
-      <h1>Arch Reactor API</h1>
-      ${JSON.stringify(contacts)}
-      `);
+      let contacts = parseContacts(body);
+      res.setHeader('Content-Type', 'application/json');
+      if(req.query.pretty === undefined){
+        res.send(JSON.stringify(contacts));
+      } else {
+        res.send(JSON.stringify(contacts, null, 3));
+      }
     } else {
       let errorMessage = {
         msg: "Error, check /config. Message was: " + JSON.stringify(error)
