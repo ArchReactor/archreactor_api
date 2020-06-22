@@ -1,0 +1,8 @@
+{
+  "realm" : "archreactor",
+  "realm-public-key" : "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhOJFPxe6vH6QMVZRm5r0kb3tjIp8ttjefRZKCFrK7/Esf+g8TSDA0XNod0/bT77nwddhwBfDgPxLBRP3V8swg4zLovCLKVWtpH9rp8UZf6wO2Hq3UeRmFmJaCEkgjtXJ529g2nDr7i8tQ2ps9IXT7WC7aLyUoRL61l49eU7Z1WYeYuHWSy+5S+/+4RYPZrWuIsC9dgPceUsYpegx2jmh6hiM6pRBQbrbfPBL69a4UaAThVczIXLP0wL2M5BDc6oBBR6htYU4+fLLHvJof8GAj1eB8datTZ3XVNaw8SHCjXMP8Avr6z3Ej2ViDTVn/S4+T9QFGtoYShhZtwYMZyJD3wIDAQAB",
+  "auth-server-url" : "https://users.archreactor.net/auth",
+  "ssl-required" : "external",
+  "resource" : "archreactor-api",
+  "public-client" : true
+}
