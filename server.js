@@ -99,6 +99,11 @@ app.get("/users", (req, res) => {
       <h1>Arch Reactor API</h1>
       ${JSON.stringify(contacts)}
       `);
+    } else {
+      let errorMessage = {
+        msg: "Error, check /config. Message was: " + JSON.stringify(error)
+      }
+      res.send(JSON.stringify(errorMessage))
     }
   });
 });
