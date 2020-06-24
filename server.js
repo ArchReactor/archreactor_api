@@ -124,9 +124,16 @@ app.get("/tools", (req, res) => {
     "Authorization": `Bearer ${settings.snipeit.token}`
   };
   request({url: "http://tools.archreactor.net/api/v1/hardware", headers: headers}, function (error, response, body) {
-    let tools = parseTools(body)
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify(tools, null, 3));
+    if(response && response.statusCode == 200){
+      let tools = parseTools(body)
+      res.setHeader('Content-Type', 'application/json');
+      res.send(JSON.stringify(tools, null, 3));
+    } else {
+      let errorMessage = {
+        msg: "Error, check /config. Message was: " + JSON.stringify(error)
+      }
+      res.send(JSON.stringify(errorMessage))
+    }
   });
 });
 
