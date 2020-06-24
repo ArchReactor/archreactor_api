@@ -17,7 +17,10 @@ app.engine('html', hogan);
 const settings = {
   api_key: "",
   key: "",
-  url: ""
+  url: "",
+  snipeit: {
+     token: "" 
+  }
 }
 
 var memoryStore = new session.MemoryStore();
@@ -61,6 +64,9 @@ app.get("/config", keycloak.protect(), (req, res) => {
     settings.api_key = req.query.api_key
     settings.key = req.query.key
     settings.url = req.query.url
+    settings.snipeit = {
+      token: req.query.token
+    }
   }
   res.send(`
   <form>
@@ -70,9 +76,11 @@ app.get("/config", keycloak.protect(), (req, res) => {
     <input id="key" name="key" type="text" value="${settings.key}"><br>
     <label for="url">CivicCRM Rest URL</label>
     <input id="url" name="url" type="text" value="${settings.url}"><br>
+    <label for="token">Snipe-IT Token</label>
+    <input id="token" name="token" type="text" value="${settings.snipeit.token}"><br>
     <input type="submit">
   </form>
-  ${JSON.stringify(settings)}
+  ${JSON.stringify(settings, null, 3)}
   `)
 })
 
@@ -109,6 +117,32 @@ app.get("/users", (req, res) => {
     }
   });
 });
+
+//curl -i https://your-server/api/v1/hardware -H "Authorization: Bearer YOUR-API-KEY" -H "Content-Type: application/json"
+app.get("/tools", (req, res) => {
+  let headers = {
+    "Authorization": `Bearer ${settings.snipeit.token}`
+  };
+  request({url: "http://tools.archreactor.net/api/v1/hardware", headers: headers}, function (error, response, body) {
+    let tools = parseTools(body)
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(tools, null, 3));
+  });
+});
+
+function parseTools(jsonString){
+  let tools = JSON.parse(jsonString).rows
+  // return tools
+  return tools.map(element => {
+    return {
+      id: element.id,
+      name: element.name,
+      asset_tag: element.asset_tag,
+      status: element.status_label.name,
+      checked_out: element.assigned_to 
+    }
+  })
+}
 
 function parseContacts(jsonString){
   let contacts = JSON.parse(jsonString)
