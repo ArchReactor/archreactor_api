@@ -125,13 +125,18 @@ app.get("/tools", (req, res) => {
   };
   request({url: "http://tools.archreactor.net/api/v1/hardware", headers: headers}, function (error, response, body) {
     if(response && response.statusCode == 200){
-      if (!req.is('application/json')) {
+      // if (!req.is('application/json')) {
+      //   
+      //   return
+      // }
+      try{
+        let tools = parseTools(body)
+        res.setHeader('Content-Type', 'application/json');
+        res.send(JSON.stringify(tools, null, 3));
+      } catch (e){
         res.send(body)
-        return
       }
-      let tools = parseTools(body)
-      res.setHeader('Content-Type', 'application/json');
-      res.send(JSON.stringify(tools, null, 3));
+
     } else {
       let errorMessage = {
         msg: "Error, check /config. Message was: " + JSON.stringify(error)
