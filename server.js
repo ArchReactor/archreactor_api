@@ -3,6 +3,7 @@ var hogan = require('hogan-express');
 const express = require("express");
 var session = require('express-session');
 const request = require('request');
+const fs = require('fs');
 
 const PORT = process.env.PORT || 3000;
 
@@ -14,7 +15,7 @@ app.set('views', require('path').join(__dirname, '/view'));
 app.engine('html', hogan);
 
 
-const settings = {
+var settings = {
   api_key: "",
   key: "",
   url: "",
@@ -22,6 +23,16 @@ const settings = {
      token: "" 
   }
 }
+
+fs.readFile(
+  '.config',
+  'utf8', 
+  (err, data) => {
+    if(!err){
+      settings = JSON.parse(data)
+    }
+  }
+);
 
 var memoryStore = new session.MemoryStore();
 
@@ -67,6 +78,7 @@ app.get("/config", keycloak.protect(), (req, res) => {
     settings.snipeit = {
       token: req.query.token
     }
+    fs.writeFile(".config", JSON.stringify(settings), () => {})
   }
   res.send(`
   <form>
@@ -123,41 +135,60 @@ app.get("/tools", (req, res) => {
   let headers = {
     "Authorization": `Bearer ${settings.snipeit.token}`
   };
-  request({url: "http://tools.archreactor.net/api/v1/hardware", headers: headers}, function (error, response, body) {
-    if(response && response.statusCode == 200){
-      // if (!req.is('application/json')) {
-      //   
-      //   return
-      // }
-      try{
-        let tools = parseTools(body)
-        res.setHeader('Content-Type', 'application/json');
-        res.send(JSON.stringify(tools, null, 3));
-      } catch (e){
-        res.send(body)
+  if(req.query.asset_tag !== undefined){
+    request({url: "http://tools.archreactor.net/api/v1/hardware/bytag/" + req.query.asset_tag, headers: headers}, function (error, response, body) {
+      if(response && response.statusCode == 200){
+        try{
+          let tools = snipeitToolToArchReactorTool(JSON.parse(body))
+          res.setHeader('Content-Type', 'application/json');
+          res.send(JSON.stringify(tools, null, 3));
+        } catch (e){
+          res.send(body)
+        }
+      } else {
+        let errorMessage = {
+          msg: "Error, check /config. Message was: " + JSON.stringify(error)
+        }
+        res.send(JSON.stringify(errorMessage))
       }
-
-    } else {
-      let errorMessage = {
-        msg: "Error, check /config. Message was: " + JSON.stringify(error)
+    });
+  } else {
+    request({url: "http://tools.archreactor.net/api/v1/hardware", headers: headers}, function (error, response, body) {
+      if(response && response.statusCode == 200){
+        try{
+          let tools = parseTools(body)
+          res.setHeader('Content-Type', 'application/json');
+          res.send(JSON.stringify(tools, null, 3));
+        } catch (e){
+          res.send("ERR");
+        }
+      } else {
+        let errorMessage = {
+          msg: "Error, check /config. Message was: " + JSON.stringify(error)
+        }
+        res.send(JSON.stringify(errorMessage))
       }
-      res.send(JSON.stringify(errorMessage))
-    }
-  });
+    });
+  }
 });
 
 function parseTools(jsonString){
   let tools = JSON.parse(jsonString).rows
   // return tools
   return tools.map(element => {
-    return {
-      id: element.id,
-      name: element.name,
-      asset_tag: element.asset_tag,
-      status: element.status_label.name,
-      checked_out: element.assigned_to 
-    }
+    return snipeitToolToArchReactorTool(element);
   })
+}
+
+function snipeitToolToArchReactorTool(element){
+  return {
+    id: element.id,
+    name: element.name,
+    asset_tag: element.asset_tag,
+    status: element.status_label.name,
+    image: element.image,
+    checked_out: element.assigned_to 
+  }
 }
 
 function parseContacts(jsonString){
