@@ -96,6 +96,32 @@ app.get("/config", keycloak.protect(), (req, res) => {
   `)
 })
 
+app.get("/user/bycard/:card_id", (req, res) => {
+  let json = `{
+    "sequential": 1,
+    "custom_12": "${req.params.card_id}",
+    "return": "id,display_name,custom_12,group,custom_37",
+    "options": {
+      "sort": "sort_name ASC",
+      "limit": 1,
+      "offset": 0
+    }
+  }`
+  
+  let payload = {api_key: settings.api_key, key: settings.key, entity: "Contact", action: "get", json: json }
+  request({url: settings.url, qs: payload}, function (error, response, body) {
+    if(response && response.statusCode == 200){
+      let contacts = parseContacts(body);
+      res.json(contacts[0]);
+    } else {
+      let errorMessage = {
+        msg: "Error, check /config. Message was: " + JSON.stringify(error)
+      }
+      res.send(JSON.stringify(errorMessage))
+    }
+  });
+});
+
 app.get("/users", (req, res) => {
   let cardID = (req.query.card_id === undefined) ? "" : req.query.card_id
   let group = (req.query.group === undefined) ? "" : req.query.group
@@ -131,12 +157,12 @@ app.get("/users", (req, res) => {
 });
 
 //curl -i https://your-server/api/v1/hardware -H "Authorization: Bearer YOUR-API-KEY" -H "Content-Type: application/json"
-app.get("/tools", (req, res) => {
+app.get("/tool/:asset_tag", (req, res) => {
   let headers = {
     "Authorization": `Bearer ${settings.snipeit.token}`
   };
-  if(req.query.asset_tag !== undefined){
-    request({url: "http://tools.archreactor.net/api/v1/hardware/bytag/" + req.query.asset_tag, headers: headers}, function (error, response, body) {
+  if(req.params.asset_tag !== undefined){
+    request({url: "http://tools.archreactor.net/api/v1/hardware/bytag/" + req.params.asset_tag, headers: headers}, function (error, response, body) {
       if(response && response.statusCode == 200){
         try{
           let tools = snipeitToolToArchReactorTool(JSON.parse(body))
@@ -172,6 +198,28 @@ app.get("/tools", (req, res) => {
   }
 });
 
+app.get("/tools", (req, res) => {
+  let headers = {
+    "Authorization": `Bearer ${settings.snipeit.token}`
+  };
+  request({url: "http://tools.archreactor.net/api/v1/hardware", headers: headers}, function (error, response, body) {
+      if(response && response.statusCode == 200){
+        try{
+          let tools = parseTools(body)
+          res.setHeader('Content-Type', 'application/json');
+          res.send(JSON.stringify(tools, null, 3));
+        } catch (e){
+          res.send("ERR");
+        }
+      } else {
+        let errorMessage = {
+          msg: "Error, check /config. Message was: " + JSON.stringify(error)
+        }
+        res.send(JSON.stringify(errorMessage))
+      }
+    });
+});
+
 function parseTools(jsonString){
   let tools = JSON.parse(jsonString).rows
   // return tools
@@ -181,12 +229,15 @@ function parseTools(jsonString){
 }
 
 function snipeitToolToArchReactorTool(element){
+  let cost = (element.purchase_cost === null) ? 0 : parseFloat(element.purchase_cost);
   return {
     id: element.id,
     name: element.name,
     asset_tag: element.asset_tag,
     status: element.status_label.name,
     image: element.image,
+    cost: cost,
+    group_required: element.custom_fields.archreactor_group_id.value,
     checked_out: element.assigned_to 
   }
 }
