@@ -21,4 +21,8 @@ const getSettings = () => {
   return settings;
 };
 
-exports.getSettings = getSettings;
+const save = () => {
+  fs.writeFile('.config', JSON.stringify(settings), () => {});
+};
+
+module.exports = { getSettings, save };

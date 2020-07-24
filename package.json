@@ -12,7 +12,6 @@
   "dependencies": {
     "express": "^4.17.1",
     "express-session": "^1.17.1",
-    "hogan-express": "^0.5.2",
     "keycloak-connect": "^10.0.2",
     "request": "^2.88.2"
   },
