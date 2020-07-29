@@ -7,10 +7,12 @@ const civicCRM = require('../civiccrm/utils');
 router.get('/users', (req, res) => {
   let cardID = req.query.card_id === undefined ? '' : req.query.card_id;
   let group = req.query.group === undefined ? '' : req.query.group;
+  let name = req.query.name === undefined ? '' : req.query.name;
   let json = `{
     "sequential": 1,
     "custom_12": "${cardID}",
     "group": "${group}",
+    "display_name": "${name}",
     "return": "id,display_name,custom_12,group,custom_37",
     "options": {
       "sort": "sort_name ASC",
