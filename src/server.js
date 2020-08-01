@@ -17,8 +17,7 @@ app.use('', userRoute);
 app.use('', toolRoute);
 app.use('', toolsRoute);
 
-app.set('view engine', 'html');
-app.set('views', require('path').join(__dirname, '/view'));
+app.use('/', express.static('public'));
 
 var memoryStore = new session.MemoryStore();
 
@@ -36,10 +35,6 @@ var keycloak = new Keycloak({ store: memoryStore });
 app.use(keycloak.middleware());
 
 app.get('/config', keycloak.protect(), getConfig);
-
-app.get('/', function (req, res) {
-  res.render('index');
-});
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}...`);
