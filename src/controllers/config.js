@@ -8,6 +8,7 @@ exports.getConfig = (req, res, next) => {
     settings.getSettings().snipeit = {
       token: req.query.token,
     };
+    settings.getSettings().nodered.url = req.query.nodered_url;
     settings.save();
   }
   res.send(`
@@ -27,6 +28,10 @@ exports.getConfig = (req, res, next) => {
     <label for="token">Snipe-IT Token</label>
     <input id="token" name="token" type="text" value="${
       settings.getSettings().snipeit.token
+    }"><br>
+    <label for="token">Nodered Webhook URL</label>
+    <input id="nodered_url" name="nodered_url" type="text" value="${
+      settings.getSettings().nodered.url
     }"><br>
     <input type="submit">
   </form>

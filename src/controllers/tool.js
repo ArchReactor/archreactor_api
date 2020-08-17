@@ -1,6 +1,7 @@
 const request = require('request');
 const settings = require('../settings/settings');
 const snipeit = require('../snipeit/snipeit');
+const { response } = require('express');
 
 exports.getTool = (req, res, next) => {
   let headers = {
@@ -52,4 +53,16 @@ exports.getTool = (req, res, next) => {
       }
     );
   }
+};
+
+exports.checkoutTool = (req, res, next) => {
+  const url = settings.getSettings().nodered.url;
+  request(
+    {
+      url: `${url}?card_id=${req.params.card_id}&asset_tag=${req.params.asset_tag}`,
+    },
+    (error, response, body) => {
+      res.json(JSON.parse(body));
+    }
+  );
 };

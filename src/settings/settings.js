@@ -8,6 +8,9 @@ const settings = {
   snipeit: {
     token: '',
   },
+  nodered: {
+    url: '',
+  },
 };
 
 fs.readFile('.config', 'utf8', (err, data) => {
