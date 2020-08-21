@@ -1,68 +1,68 @@
 const request = require('request');
 const settings = require('../settings/settings');
 const snipeit = require('../snipeit/snipeit');
+const axios = require('axios');
 const { response } = require('express');
+
+exports.checkForErrors = (req, res, next) => {
+  if (settings.getSettings().snipeit.token == undefined) {
+    let errorMessage = {
+      msg: 'Missing Snipe it Token. Check config.',
+    };
+    return res.status(500).json(errorMessage);
+  }
+  next();
+};
 
 exports.getTool = (req, res, next) => {
   let headers = {
     Authorization: `Bearer ${settings.getSettings().snipeit.token}`,
   };
-  if (req.params.asset_tag !== undefined) {
-    request(
-      {
-        url:
-          'http://tools.archreactor.net/api/v1/hardware/bytag/' +
-          req.params.asset_tag,
-        headers: headers,
-      },
-      function (error, response, body) {
-        if (response && response.statusCode == 200) {
-          try {
-            let tools = snipeit.snipeitToolToArchReactorTool(JSON.parse(body));
-            res.json(tools);
-          } catch (e) {
-            console.log(e);
-            res.status(500).send(body);
-          }
-        } else {
-          let errorMessage = {
-            msg: 'Error, check /config. Message was: ' + JSON.stringify(error),
-          };
-          res.send(JSON.stringify(errorMessage));
-        }
-      }
-    );
-  } else {
-    request(
-      { url: 'http://tools.archreactor.net/api/v1/hardware', headers: headers },
-      function (error, response, body) {
-        if (response && response.statusCode == 200) {
-          try {
-            let tools = parseTools(body);
-            res.setHeader('Content-Type', 'application/json');
-            res.send(JSON.stringify(tools, null, 3));
-          } catch (e) {
-            res.send('ERR');
-          }
-        } else {
-          let errorMessage = {
-            msg: 'Error, check /config. Message was: ' + JSON.stringify(error),
-          };
-          res.send(JSON.stringify(errorMessage));
-        }
-      }
-    );
-  }
+  let url =
+    'http://tools.archreactor.net/api/v1/hardware/bytag/' +
+    req.params.asset_tag;
+  axios
+    .get(url, { headers: headers })
+    .then((response) => {
+      let tools = snipeit.snipeitToolToArchReactorTool(response.data);
+      res.json(tools);
+    })
+    .catch((error) => {
+      res.status(500).json(error);
+    });
 };
 
 exports.checkoutTool = (req, res, next) => {
   const url = settings.getSettings().nodered.url;
-  request(
-    {
-      url: `${url}?card_id=${req.params.card_id}&asset_tag=${req.params.asset_tag}`,
-    },
-    (error, response, body) => {
-      res.json(JSON.parse(body));
-    }
-  );
+  axios
+    .get(
+      `${url}?card_id=${req.params.card_id}&asset_tag=${req.params.asset_tag}`
+    )
+    .then((response) => {
+      res.json(response.data);
+    });
+};
+
+exports.checkinTool = (req, res, next) => {
+  let headers = {
+    Authorization: `Bearer ${settings.getSettings().snipeit.token}`,
+  };
+  let config = {
+    headers: headers,
+  };
+  let url =
+    'http://tools.archreactor.net/api/v1/hardware/bytag/' +
+    req.params.asset_tag;
+
+  axios.get(url, config).then((response) => {
+    let url = `http://tools.archreactor.net/api/v1/hardware/${response.data.id}/checkin`;
+    axios
+      .post(url, {}, config)
+      .then((response) => {
+        res.json(response.data);
+      })
+      .catch((error) => {
+        res.json(error);
+      });
+  });
 };
