@@ -32,10 +32,16 @@ const checkSettings = (req, res, next) => {
   for(const property in settings){
     if(!settings[property]){
       missing.push(property)
-    } else {
-      for(const childProp in settings[property]){
-        missing.push(`${property}: ${childProp}`)
-      }
+    }
+  }
+  for(const property in settings.snipeit){
+    if(!settings.snipeit[property]){
+      missing.push(property)
+    }
+  }
+  for(const property in settings.nodered){
+    if(!settings.nodered[property]){
+      missing.push(property)
     }
   }
   if(missing.length > 0){
