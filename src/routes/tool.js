@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const ipfilter = require('express-ipfilter').IpFilter;
 const {
-  checkForErrors,
   getTool,
   checkoutTool,
   checkinTool,
@@ -24,14 +23,14 @@ const localOnlyRule = ipfilter(
   }
 );
 
-router.route('/tool/:asset_tag').get(checkForErrors, getTool);
+router.route('/tool/:asset_tag').get(getTool);
 
 router
   .route('/tool/:asset_tag/checkout/:card_id')
-  .get(localOnlyRule, checkForErrors, checkoutTool);
+  .get(localOnlyRule, checkoutTool);
 
 router
   .route('/tool/:asset_tag/checkin')
-  .get(localOnlyRule, checkForErrors, checkinTool);
+  .get(localOnlyRule, checkinTool);
 
 module.exports = router;
