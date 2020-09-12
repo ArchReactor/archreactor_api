@@ -1,18 +1,7 @@
-const request = require('request');
+
 const settings = require('../settings/settings');
 const snipeit = require('../snipeit/snipeit');
 const axios = require('axios');
-const { response } = require('express');
-
-exports.checkForErrors = (req, res, next) => {
-  if (settings.getSettings().snipeit.token == undefined) {
-    let errorMessage = {
-      msg: 'Missing Snipe it Token. Check config.',
-    };
-    return res.status(500).json(errorMessage);
-  }
-  next();
-};
 
 exports.getTool = (req, res, next) => {
   let headers = {
