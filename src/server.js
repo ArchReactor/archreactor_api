@@ -6,10 +6,14 @@ const userRoute = require('./routes/user');
 const toolRoute = require('./routes/tool');
 const toolsRoute = require('./routes/tools');
 const { getConfig } = require('./controllers/config.js');
+const { checkSettings } = require('./settings/settings.js');
 
 const PORT = process.env.PORT || 3000;
 
 const app = express();
+
+// Check for Errors
+app.use('', checkSettings);
 
 // Setup routes
 app.use('', usersRoute);
