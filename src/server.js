@@ -13,7 +13,13 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 
 // Check for Errors
-app.use('', checkSettings);
+app.use((req, res, next) => {
+  if(req.path === '/config'){
+    return next();
+  } else {
+    return checkSettings(req, res, next);
+  }
+});
 
 // Setup routes
 app.use('', usersRoute);
