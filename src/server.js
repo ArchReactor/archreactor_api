@@ -12,17 +12,6 @@ const PORT = process.env.PORT || 3000;
 
 const app = express();
 
-// Check for Errors
-app.use('', checkSettings);
-
-// Setup routes
-app.use('', usersRoute);
-app.use('', userRoute);
-app.use('', toolRoute);
-app.use('', toolsRoute);
-
-app.use('/', express.static('public'));
-
 var memoryStore = new session.MemoryStore();
 
 app.use(
@@ -39,6 +28,17 @@ var keycloak = new Keycloak({ store: memoryStore });
 app.use(keycloak.middleware());
 
 app.get('/config', keycloak.protect(), getConfig);
+
+// Check for Errors
+app.use('', checkSettings);
+
+// Setup routes
+app.use('', usersRoute);
+app.use('', userRoute);
+app.use('', toolRoute);
+app.use('', toolsRoute);
+
+app.use('/', express.static('public'));
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}...`);

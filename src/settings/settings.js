@@ -28,17 +28,13 @@ const save = () => {
 };
 
 const checkSettings = (req, res, next) => {
-  const missing = []
-  for(const property in settings){
-    if(!settings[property]){
-      missing.push(property)
-    } else {
-      for(const childProp in settings[property]){
-        missing.push(`${property}: ${childProp}`)
-      }
+  const missing = [];
+  for (const property in settings) {
+    if (!settings[property]) {
+      missing.push(property);
     }
   }
-  if(missing.length > 0){
+  if (missing.length > 0) {
     var url = req.protocol + '://' + req.get('host');
     let errorMessage = {
       msg: `Missing ${missing}. Check config at ${url}/config.`,
