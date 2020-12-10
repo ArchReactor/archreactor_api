@@ -30,7 +30,7 @@ app.use(keycloak.middleware());
 
 // Check for Errors
 app.use((req, res, next) => {
-  if(req.path === '/config'){
+  if (req.path === '/config') {
     return next();
   } else {
     return checkSettings(req, res, next);
