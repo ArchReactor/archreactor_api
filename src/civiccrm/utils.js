@@ -17,6 +17,7 @@ const civicCRMUserToArchReactorUser = (civicUser) => {
     user_id: civicUser.contact_id,
     groups: civicUser.groups,
     name: civicUser.display_name,
+    // new_card_id in CivicCRM
     card_id: civicUser.custom_12,
     volunteer_status: volunteer_status,
   };
